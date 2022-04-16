@@ -1,0 +1,3 @@
+# Lab Notes
+
+- vagrant up 

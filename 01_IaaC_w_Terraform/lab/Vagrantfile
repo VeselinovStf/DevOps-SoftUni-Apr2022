@@ -1,0 +1,39 @@
+# -*- mode: ruby -*-
+# vi: set ft-ruby :
+
+Vagrant.configure("2") do |config|
+    config.ssh.insert_key = false
+
+  # Lab
+  config.vm.define "lab" do |lab|
+    lab.vm.box="veselinovstf/debian-minimal"
+    lab.vm.hostname = "lab.do2.lab"
+    lab.vm.network "private_network", ip: "192.168.150.101"
+    lab.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
+    lab.vm.provision "shell", path: "./vagrant/scripts/debian/install-prerequisites-debian.sh"
+    lab.vm.provision "shell", path: "./vagrant/scripts/debian/terraform/install-terraform-debian.sh"
+    lab.vm.provision "shell", path: "./vagrant/scripts/debian/terraform/command-completition-debian.sh"
+    lab.vm.provision "shell", path: "./vagrant/scripts/debian/virtualbox/install-virtualbox-debian.sh"
+    lab.vm.provision "shell", path: "./vagrant/scripts/debian/docker/install-docker-debian.sh"
+    lab.vm.provider :virtualbox do |vb|
+        vb.memory = 2048
+        vb.cpus = 1
+        vb.gui = false
+    end
+  end
+
+  config.vm.define "docker" do |docker|
+    docker.vm.box="veselinovstf/debian-minimal"
+    docker.vm.hostname = "docker.do2.lab"
+    docker.vm.network "private_network", ip: "192.168.150.102"
+    docker.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
+    docker.vm.provision "shell", path: "./vagrant/scripts/debian/install-prerequisites-debian.sh"
+    docker.vm.provision "shell", path: "./vagrant/scripts/debian/docker/install-docker-debian.sh"
+    docker.vm.provision "shell", path: "./vagrant/scripts/debian/docker/remote-docker-daemon-debian.sh"
+    docker.vm.provider :virtualbox do |vb|
+        vb.memory = 1024
+        vb.cpus = 1
+        vb.gui = false
+    end
+  end
+end

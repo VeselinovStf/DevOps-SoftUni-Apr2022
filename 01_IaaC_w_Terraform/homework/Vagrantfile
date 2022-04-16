@@ -1,0 +1,23 @@
+# -*- mode: ruby -*-
+# vi: set ft-ruby :
+
+Vagrant.configure("2") do |config|
+    config.ssh.insert_key = false
+
+  # Lab
+  config.vm.define "terraform" do |terraform|
+    terraform.vm.box="veselinovstf/debian-minimal"
+    terraform.vm.hostname = "terraform.do2.homework"
+    terraform.vm.network "private_network", ip: "192.168.150.101"
+    terraform.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
+    terraform.vm.provision "shell", path: "./vagrant/scripts/debian/install-prerequisites-debian.sh"
+    terraform.vm.provision "shell", path: "./vagrant/scripts/debian/terraform/install-terraform-debian.sh"
+    terraform.vm.provision "shell", path: "./vagrant/scripts/debian/terraform/command-completition-debian.sh"
+    terraform.vm.provision "shell", path: "./vagrant/scripts/debian/docker/install-docker-debian.sh"
+    terraform.vm.provider :virtualbox do |vb|
+        vb.memory = 2048
+        vb.cpus = 1
+        vb.gui = false
+    end
+  end
+end
