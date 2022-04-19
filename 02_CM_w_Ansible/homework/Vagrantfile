@@ -1,0 +1,73 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# How to
+# vagrant up ansible docker # Assignment 1
+# vagrant destroy docker --force
+# vagrant up web db # Assignment 2
+# vagrant destroy --force
+#
+# Ip Range
+# 192.168.150.100/103
+#
+# hostnames
+# ansible.do2.homework
+# docker.do2.homework
+# web.do2.homework
+# db.do2.homework
+
+Vagrant.configure(2) do |config|
+    
+  config.ssh.insert_key = false
+
+  # Main working host
+  config.vm.define "ansible" do |ansible|
+    ansible.vm.box = "shekeriev/centos-stream-8"
+    ansible.vm.hostname = "ansible.do2.homework"
+    ansible.vm.network "private_network", ip: "192.168.150.100"
+    ansible.vm.synced_folder "vagrant/", "/vagrant"
+    ansible.vm.provision "shell", path: "vagrant/scripts/centos-stream-8/ansible/install-ansible-centos-stream.sh"
+    ansible.vm.provider :virtualbox do |vb|
+      vb.memory = 2048
+      vb.cpus = 1
+    end
+  end
+
+  # Docker Vm Assignment #1
+  config.vm.define "docker" do |docker|
+    docker.vm.box = "shekeriev/centos-stream-8"
+    docker.vm.hostname = "docker.do2.homework"
+    docker.vm.network "private_network", ip: "192.168.150.101"
+    docker.vm.network "forwarded_port", guest: 80, host: 8080
+    docker.vm.provider :virtualbox do |vb|
+      vb.memory = 512
+      vb.cpus = 1
+    end
+  end
+
+  # WEB Vm Assignment #2
+  config.vm.define "web" do |web|
+    web.vm.box = "shekeriev/debian-11"
+    web.vm.hostname = "web.do2.homework"
+    web.vm.network "private_network", ip: "192.168.150.102"
+    web.vm.network "forwarded_port", guest: 80, host: 8081
+    web.vm.provider :virtualbox do |vb|
+      vb.memory = 512
+      vb.cpus = 1
+      vb.customize ["modifyvm", :id, "--usb", "off"]
+      vb.customize ["modifyvm", :id, "--usbehci", "off"]
+    end
+  end
+  
+  # DB Vm Assignment #2
+  config.vm.define "db" do |db|
+    db.vm.box = "shekeriev/centos-stream-8"
+    db.vm.hostname = "db.do2.homework"
+    db.vm.network "private_network", ip: "192.168.150.103"
+    db.vm.provider :virtualbox do |vb|
+      vb.memory = 1024
+      vb.cpus = 1
+    end
+  end
+ 
+end
