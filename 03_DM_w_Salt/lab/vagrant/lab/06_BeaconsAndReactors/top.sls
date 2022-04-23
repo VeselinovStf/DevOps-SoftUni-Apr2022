@@ -1,0 +1,4 @@
+base:
+  '*':
+    - dummy_conf
+  
