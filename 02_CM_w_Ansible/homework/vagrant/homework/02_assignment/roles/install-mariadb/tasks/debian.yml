@@ -1,0 +1,12 @@
+- name: "Install Software"
+  apt:
+    name: "{{item}}"
+    state: present
+  with_items: 
+    - mariadb-server
+
+- name: "Enable MariaDb"
+  service:
+    name: mariadb
+    enabled: yes
+    state: restart

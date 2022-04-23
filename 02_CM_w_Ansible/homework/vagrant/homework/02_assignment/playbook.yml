@@ -1,0 +1,29 @@
+---
+- hosts: db
+  name: Database Play
+  become: true
+  roles:
+    - install-mariadb
+  tasks:
+    - name: Update Hosts
+      shell: "{{item}}"
+      with_items:
+        - echo "192.168.150.102 web.do2.homework web" >> /etc/hosts
+        - echo "192.168.150.103 db.do2.homework db" >> /etc/hosts
+    - name: "Create and load the database"
+      shell: mysql -u root < /vagrant/homework/02_assignment/src/db/db_setup.sql
+- hosts: web
+  name: Web Play
+  become: true
+  roles:
+    - install-apache2
+  tasks:
+    - name: Update Hosts
+      shell: "{{item}}"
+      with_items:
+        - echo "192.168.150.102 web.do2.homework web" >> /etc/hosts
+        - echo "192.168.150.103 db.do2.homework db" >> /etc/hosts
+    - name: "Copy Source Files"
+      copy:
+        src: /vagrant/homework/02_assignment/src/web
+        dest: /var/www/html/

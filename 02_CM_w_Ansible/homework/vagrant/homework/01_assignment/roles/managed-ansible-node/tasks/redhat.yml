@@ -1,0 +1,11 @@
+- name: Install required system packages
+  yum:
+    name: "{{item}}"
+    state: latest
+    update_cache: true
+  with_items:
+    - python3-pip
+    - virtualenv
+    - python3-setuptools
+- name: Installing Ansible Prerequisits
+  command: "pip3 install docker"

@@ -1,0 +1,20 @@
+---
+- hosts: all
+  name: Create Docker Host
+  become: true
+  roles: 
+    - managed-ansible-node
+    - install-docker
+- hosts: all
+  name: Start NGINX Container
+  become: true
+  tasks:
+    - name: Create NGINX Docker Container
+      docker_container:
+        name: con_nginx
+        image: nginx
+        ports:
+          - "80:80"
+        state: started
+        detach: yes
+        

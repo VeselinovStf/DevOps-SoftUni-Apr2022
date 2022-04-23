@@ -1,0 +1,16 @@
+- name: "Install Software"
+  apt:
+    name: "{{item}}"
+    state: present
+    update_cache: true
+  with_items: 
+    - apache2
+    - php
+    - php-mysqlnd
+
+- name: "Enable HTTP"
+  service:
+    name: apache2
+    enabled: yes
+    state: restarted
+
