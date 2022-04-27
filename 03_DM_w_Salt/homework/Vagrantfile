@@ -1,0 +1,83 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.ssh.insert_key = false
+
+  # Salt Server
+  config.vm.define "server" do |server|
+    server.vm.box = "shekeriev/centos-stream-8"
+    server.vm.hostname = "server.do2.homework"
+    server.vm.network "private_network", ip: "192.168.150.100"
+    server.vm.provision "shell", path: "scripts/add_hosts.sh" # Adds hosts to file
+	  server.vm.provision "shell", path: "scripts/centos/add_packages_centos.sh" # Addung mendatory packages
+	  server.vm.provision "shell", path: "scripts/centos/salt/create-master-salt.sh" # Adding Salt as Master
+    server.vm.provision "shell", path: "scripts/copy_solution_files.sh" # Copy all solution files to salt
+    server.vm.synced_folder "vagrant/", "/vagrant"
+    server.vm.provider "virtualbox" do |v|
+      v.gui = false
+      v.memory = 2048
+      v.cpus = 1
+    end
+  end
+  
+  # Salt Client #1 - Docker - Assignment # 1
+  config.vm.define "docker" do |docker|
+    docker.vm.box = "shekeriev/centos-stream-8"
+    docker.vm.hostname = "docker.do2.homework"
+    docker.vm.network "private_network", ip: "192.168.150.101"
+    docker.vm.provision "shell", path: "scripts/add_hosts.sh"
+	  docker.vm.provision "shell", path: "scripts/centos/add_packages_centos.sh"
+	  docker.vm.provision "shell", path: "scripts/centos/salt/create-minion.sh" # Creates Salt Minion
+    docker.vm.network "forwarded_port", guest: 80, host: 8080
+    docker.vm.synced_folder "vagrant/", "/vagrant"
+    docker.vm.provider "virtualbox" do |v|
+      v.gui = false
+      v.memory = 1024
+      v.cpus = 1
+    end
+  end
+
+   # Salt Client #2 - App-Web -  Assignment # 2
+  config.vm.define "web" do |web|
+    web.vm.box = "shekeriev/debian-11"
+    web.vm.hostname = "web.do2.homework"
+    web.vm.network "private_network", ip: "192.168.150.102"
+    web.vm.provision "shell", path: "scripts/add_hosts.sh"
+	  web.vm.provision "shell", path: "scripts/debian/add_packages_debian.sh"
+	  web.vm.provision "shell", path: "scripts/debian/salt/create-minion.sh"
+    web.vm.network "forwarded_port", guest: 80, host: 8081
+    web.vm.synced_folder "vagrant/", "/vagrant"
+    web.vm.provider "virtualbox" do |v|
+      v.gui = false
+      v.memory = 512
+      v.cpus = 1
+      v.customize ["modifyvm", :id, "--usb", "off"]
+      v.customize ["modifyvm", :id, "--usbehci", "off"]
+    end
+  end
+  
+  # Salt Client #2 - App-Db -  Assignment # 2
+  config.vm.define "db" do |db|
+    db.vm.box = "shekeriev/centos-stream-8"
+    db.vm.hostname = "db.do2.homework"
+    db.vm.network "private_network", ip: "192.168.150.103"
+    db.vm.provision "shell", path: "scripts/add_hosts.sh"
+	  db.vm.provision "shell", path: "scripts/centos/add_packages_centos.sh"
+	  db.vm.provision "shell", path: "scripts/centos/salt/create-minion.sh"
+    db.vm.synced_folder "vagrant/", "/vagrant"
+    db.vm.provider "virtualbox" do |v|
+      v.gui = false
+      v.memory = 512
+      v.cpus = 1
+    end
+  end
+
+  # Link all Minions to Master
+  config.trigger.after :up do |trigger|
+        trigger.only_on = "db"
+        trigger.info = "* Register Salt Minions"
+        trigger.run = {inline: "vagrant ssh -c 'sudo salt-key -A -y' server"}
+  end 
+  
+end
