@@ -1,0 +1,25 @@
+parameters:
+  targets:
+    type: TargetSpec
+  pkg:
+    type: String
+  src:
+    type: String
+
+steps:
+  - name: install_apache
+    task: package
+    targets: $targets
+    parameters:
+      action: install
+      name: $pkg
+    description: "Install the $pkg package"
+  - name: start_apache
+    script: apache/apachestart.sh
+    targets: $targets
+    description: "Start the service with script"
+  - name: upload_homepage
+    upload: $src
+    destination: /var/www/html/index.html
+    targets: $targets
+    description: "Upload custom index.html file"

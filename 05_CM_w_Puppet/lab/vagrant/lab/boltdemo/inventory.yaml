@@ -1,0 +1,13 @@
+groups:
+- name: nodes
+  targets:
+    - uri: puppet-client-1
+      name: client1
+    - uri: puppet-client-2
+      name: client2
+  config:
+    transport: ssh
+    ssh:
+      user: vagrant
+      password: vagrant
+      host-key-check: false
