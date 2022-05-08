@@ -1,0 +1,57 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.ssh.insert_key = false
+
+  # Chef Server - CentOS Stream 8
+  config.vm.define "server" do |server|
+    server.vm.box = "shekeriev/centos-stream-8"
+    server.vm.hostname = "server"
+    server.vm.network "private_network", ip: "192.168.99.101"
+    server.vm.provision "shell", path: "scripts/add_hosts.sh"
+    server.vm.provision "shell", path: "scripts/centos/chef/prep-centos.sh"
+    server.vm.provision "shell", path: "scripts/centos/chef/chef-server-core-centos.sh"
+    server.vm.provision "shell", path: "scripts/centos/chef/add-chef-roles-centos.sh"
+    #server.vm.provision "shell", path: "scripts/chef/chef-manage.sh"
+    server.vm.synced_folder "vagrant/", "/vagrant"
+    server.vm.provider "virtualbox" do |v|
+      v.gui = false
+      v.memory = 4096
+      v.cpus = 1
+    end
+  end
+  
+  # Chef Client #1 - CentOS Stream 8
+  config.vm.define "docker" do |docker|
+    docker.vm.box = "shekeriev/centos-stream-8"
+    docker.vm.hostname = "docker"
+    docker.vm.network "private_network", ip: "192.168.99.102"
+    docker.vm.provision "shell", path: "scripts/add_hosts.sh"
+    docker.vm.provision "shell", path: "scripts/centos/chef/prep-centos.sh"
+    docker.vm.synced_folder "vagrant/", "/vagrant"
+    docker.vm.provider "virtualbox" do |v|
+      v.gui = false
+      v.memory = 512
+      v.cpus = 1
+    end
+  end
+
+  
+  # Chef Workstation - CentOS 8.x
+  config.vm.define "workstation" do |workstation|
+    workstation.vm.box = "shekeriev/centos-stream-8"
+    workstation.vm.hostname = "workstation"
+    workstation.vm.network "private_network", ip: "192.168.99.105"
+    workstation.vm.provision "shell", path: "scripts/add_hosts.sh"
+    workstation.vm.provision "shell", path: "scripts/centos/chef/prep-centos.sh"
+    workstation.vm.provision "shell", path: "scripts/centos/chef/chef-workstation-centos.sh"
+    workstation.vm.synced_folder "vagrant/", "/vagrant"
+    workstation.vm.provider "virtualbox" do |v|
+      v.gui = false
+      v.memory = 2048
+      v.cpus = 1
+    end
+  end
+  
+end
