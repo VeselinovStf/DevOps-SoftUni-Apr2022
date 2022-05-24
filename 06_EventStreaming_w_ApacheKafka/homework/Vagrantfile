@@ -1,0 +1,43 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.ssh.insert_key = false
+
+  # Apache Kafka - CentOS Stream 8
+  config.vm.define "kafka-1" do |kafka|
+    kafka.vm.box = "shekeriev/centos-stream-8"
+    kafka.vm.hostname = "kafka-1"
+    kafka.vm.network "private_network", ip: "192.168.99.101"
+    kafka.vm.provision "shell", path: "scripts/add_hosts.sh"
+    kafka.vm.provision "shell", path: "scripts/centos/apache-kafka/prepare-for-kafka-centos.sh"
+    kafka.vm.provision "shell", path: "scripts/apache-kafka/get-apache-kafka.sh"
+    kafka.vm.provision "shell", path: "scripts/apache-kafka/create-apache-kafka-node.sh"
+    kafka.vm.provision "shell", path: "scripts/apache-kafka/install-python-centos.sh"
+    kafka.vm.provision "shell", path: "scripts/centos/docker/install-docker-centos.sh"
+    kafka.vm.provision "shell", path: "vagrant/homework/solution.sh"
+    kafka.vm.synced_folder "vagrant/", "/vagrant"
+    kafka.vm.provider "virtualbox" do |v|
+      v.gui = false
+      v.memory = 2048
+      v.cpus = 1
+    end
+  end
+
+  # Monitoring - CentOS Stream 8
+  config.vm.define "monitoring" do |monitoring|
+    monitoring.vm.box = "shekeriev/centos-stream-8"
+    monitoring.vm.hostname = "monitoring"
+    monitoring.vm.network "private_network", ip: "192.168.99.102"
+    monitoring.vm.provision "shell", path: "scripts/add_hosts.sh"
+    monitoring.vm.provision "shell", path: "scripts/centos/disable-firewalld.sh"
+    monitoring.vm.provision "shell", path: "scripts/prometheus/install-prometheus.sh"
+    monitoring.vm.provision "shell", path: "scripts/centos/grafana/install-grafana-centos.sh"
+    monitoring.vm.synced_folder "vagrant/", "/vagrant"
+    monitoring.vm.provider "virtualbox" do |v|
+      v.gui = false
+      v.memory = 2048
+      v.cpus = 1
+    end
+  end
+end
