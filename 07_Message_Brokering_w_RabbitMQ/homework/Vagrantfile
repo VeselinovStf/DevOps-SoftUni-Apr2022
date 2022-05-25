@@ -1,0 +1,22 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.ssh.insert_key = false
+
+  # Apache Kafka - CentOS Stream 8
+  config.vm.define "docker" do |docker|
+    docker.vm.box = "shekeriev/centos-stream-8"
+    docker.vm.hostname = "docker"
+    docker.vm.network "private_network", ip: "192.168.99.100"
+    docker.vm.provision "shell", path: "scripts/add_hosts.sh"
+    docker.vm.provision "shell", path: "scripts/centos/docker/install_docker.sh"
+    docker.vm.provision "shell", path: "scripts/centos/docker/install_docker-compose.sh"
+    docker.vm.synced_folder "vagrant/", "/vagrant"
+    docker.vm.provider "virtualbox" do |v|
+      v.gui = false
+      v.memory = 2048
+      v.cpus = 1
+    end
+  end
+end

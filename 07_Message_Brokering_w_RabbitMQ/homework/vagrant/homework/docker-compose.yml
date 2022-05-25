@@ -1,0 +1,59 @@
+version: "3"
+services:
+  rabbitmq-1:
+    image: rabbitmq:3.10-management
+    hostname: rabbitmq-1
+    container_name: rabbitmq-1
+    ports:
+      - 8081:15672
+      - 9991:15692
+      - 5672:5672
+    volumes:
+      - /vagrant/homework/rabbitmq/node-1/:/config/
+    environment:
+      - RABBITMQ_CONFIG_FILE=/config/rabbitmq
+      - RABBITMQ_ERLANG_COOKIE=ABCDEFFGHIJKLMOP
+  rabbitmq-2:
+    image: rabbitmq:3.10-management
+    hostname: rabbitmq-2
+    container_name: rabbitmq-2
+    ports:
+      - 8082:15672
+      - 9992:15692
+    volumes:
+      - /vagrant/homework/rabbitmq/node-3/:/config/
+    environment:
+      - RABBITMQ_CONFIG_FILE=/config/rabbitmq
+      - RABBITMQ_ERLANG_COOKIE=ABCDEFFGHIJKLMOP
+  rabbitmq-3:
+    image: rabbitmq:3.10-management
+    hostname: rabbitmq-3
+    container_name: rabbitmq-3
+    ports:
+      - 8083:15672
+      - 9993:15692
+    volumes:
+      - /vagrant/homework/rabbitmq/node-3/:/config/
+    environment:
+      - RABBITMQ_CONFIG_FILE=/config/rabbitmq
+      - RABBITMQ_ERLANG_COOKIE=ABCDEFFGHIJKLMOP
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    networks:
+      - rabbitmq-net
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    networks:
+      - rabbitmq-net
+    depends_on:
+      - prometheus
+networks:
+  rabbitmq-net:

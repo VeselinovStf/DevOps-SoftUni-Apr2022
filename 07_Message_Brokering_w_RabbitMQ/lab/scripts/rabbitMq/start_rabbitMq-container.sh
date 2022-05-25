@@ -1,0 +1,1 @@
+docker run -d --rm --name rabbitmq-1 -p 5672:5672 -p 15672:15672 -p 15692:15692 rabbitmq:3.10-management

@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['localhost:9090']
+  - job_name: 'rabbitmq-server'
+    static_configs:
+    - targets: ['192.168.99.100:9981']
+    - targets: ['192.168.99.100:9982']
+    - targets: ['192.168.99.100:9983']
